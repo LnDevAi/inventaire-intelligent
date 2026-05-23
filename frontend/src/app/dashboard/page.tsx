@@ -131,6 +131,12 @@ export default function DashboardPage() {
             {isOnline ? 'En ligne' : 'Hors ligne — synchro en attente'}
           </span>
           <button
+            onClick={() => router.push('/dashboard/profile')}
+            className="text-sm text-gray-400 hover:text-white transition-colors"
+          >
+            Profil
+          </button>
+          <button
             onClick={() => { localStorage.removeItem('token'); router.push('/login'); }}
             className="text-sm text-gray-400 hover:text-white transition-colors"
           >

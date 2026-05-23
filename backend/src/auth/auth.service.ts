@@ -2,7 +2,7 @@ import { Injectable, UnauthorizedException, ConflictException } from '@nestjs/co
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../prisma/prisma.service';
-import { LoginDto, RegisterDto } from './dto/auth.dto';
+import { LoginDto, RegisterDto, UpdateMeDto } from './dto/auth.dto';
 
 @Injectable()
 export class AuthService {
@@ -37,6 +37,41 @@ export class AuthService {
     if (!valid) throw new UnauthorizedException('Invalid credentials');
 
     return this.signToken(user);
+  }
+
+  async getMe(userId: string) {
+    return this.prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        companyId: true,
+        company: { select: { name: true, country: true, subscriptionPlan: true } },
+        _count: { select: { locationsCaptured: true } },
+      },
+    });
+  }
+
+  async updateMe(userId: string, dto: UpdateMeDto) {
+    const updates: { name?: string; email?: string; passwordHash?: string } = {};
+    if (dto.name)  updates.name  = dto.name;
+    if (dto.email) updates.email = dto.email;
+
+    if (dto.newPassword) {
+      if (!dto.currentPassword) throw new UnauthorizedException('Mot de passe actuel requis');
+      const user = await this.prisma.user.findUnique({ where: { id: userId } });
+      const valid = await bcrypt.compare(dto.currentPassword, user!.passwordHash);
+      if (!valid) throw new UnauthorizedException('Mot de passe actuel incorrect');
+      updates.passwordHash = await bcrypt.hash(dto.newPassword, 12);
+    }
+
+    return this.prisma.user.update({
+      where: { id: userId },
+      data: updates,
+      select: { id: true, name: true, email: true, role: true, companyId: true },
+    });
   }
 
   private signToken(user: { id: string; email: string; companyId: string; role: string }) {
