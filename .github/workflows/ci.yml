@@ -1,4 +1,4 @@
-﻿name: CI
+name: CI
 
 on:
   push:
@@ -7,41 +7,66 @@ on:
     branches: [main, dev]
 
 jobs:
-  ci:
-    name: Lint, Test & Type check
+  backend:
+    name: Backend — Node.js ${{ matrix.node-version }} (NestJS)
     runs-on: ubuntu-latest
 
     strategy:
       matrix:
-        python-version: ["3.11", "3.12"]
+        node-version: ["18.x", "20.x"]
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v5
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
         with:
-          python-version: ${{ matrix.python-version }}
-          cache: pip
+          node-version: ${{ matrix.node-version }}
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
 
-      - name: Install dependencies
+      - name: Install & Test (Backend)
         run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt --quiet
-          pip install ruff mypy pytest pytest-cov pytest-django --quiet
+          if [ -f backend/package.json ]; then
+            cd backend
+            npm ci --prefer-offline
+            npm run lint --if-present
+            npm run type-check --if-present
+            npm run test --if-present -- --ci --coverage
+            npm run build --if-present
+          else
+            echo "backend/package.json not found — skipping"
+          fi
 
-      - name: Lint (ruff)
-        run: ruff check . --output-format=github
+  frontend:
+    name: Frontend — Node.js ${{ matrix.node-version }} (Next.js)
+    runs-on: ubuntu-latest
 
-      - name: Format check (ruff)
-        run: ruff format --check .
+    strategy:
+      matrix:
+        node-version: ["18.x", "20.x"]
 
-      - name: Type check (mypy)
-        run: mypy . --ignore-missing-imports || true
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - name: Django system check
-        run: python manage.py check --deploy || true
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
 
-      - name: Test (pytest)
-        run: pytest --cov=. --cov-report=xml -q || true
+      - name: Install & Build (Frontend)
+        run: |
+          if [ -f frontend/package.json ]; then
+            cd frontend
+            npm ci --prefer-offline
+            npm run lint --if-present
+            npm run type-check --if-present
+            npm run test --if-present -- --ci
+            npm run build --if-present
+          else
+            echo "frontend/package.json not found — skipping"
+          fi
