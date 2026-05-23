@@ -39,6 +39,7 @@ export default function DashboardPage() {
   const [assets, setAssets] = useState<Asset[]>([]);
   const [loading, setLoading] = useState(true);
   const [isOnline, setIsOnline] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     setIsOnline(navigator.onLine);
@@ -53,7 +54,12 @@ export default function DashboardPage() {
   }, []);
 
   useEffect(() => {
-    if (!localStorage.getItem('token')) { router.push('/login'); return; }
+    const token = localStorage.getItem('token');
+    if (!token) { router.push('/login'); return; }
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
+      if (payload?.role === 'ADMIN') setIsAdmin(true);
+    } catch { /* token malformé */ }
     Promise.all([
       api.get<AssetStats>('/assets/stats'),
       api.get<Asset[]>('/assets'),
@@ -130,6 +136,14 @@ export default function DashboardPage() {
             <span className={`w-2 h-2 rounded-full ${isOnline ? 'bg-green-400' : 'bg-yellow-400 animate-pulse'}`} />
             {isOnline ? 'En ligne' : 'Hors ligne — synchro en attente'}
           </span>
+          {isAdmin && (
+            <button
+              onClick={() => router.push('/dashboard/admin')}
+              className="text-sm text-red-400 hover:text-red-300 transition-colors"
+            >
+              Admin
+            </button>
+          )}
           <button
             onClick={() => router.push('/dashboard/profile')}
             className="text-sm text-gray-400 hover:text-white transition-colors"
