@@ -303,7 +303,7 @@ export default function DashboardPage() {
         {/* ── Accès rapide ── */}
         <div>
           <p className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-4">Accès rapide</p>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {[
               {
                 label: 'Liste des biens',
@@ -318,6 +318,12 @@ export default function DashboardPage() {
                 href: '/dashboard/enroll',
                 icon: '🏷️',
                 desc: `${tagCount} tag(s) actif(s)`,
+              },
+              {
+                label: 'Scan terrain',
+                href: '/dashboard/scan',
+                icon: '📱',
+                desc: 'QR · RFID · GPS — mode offline',
               },
               {
                 label: 'Carte GPS',
