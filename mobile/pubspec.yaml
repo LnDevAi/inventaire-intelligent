@@ -1,0 +1,49 @@
+name: inventaire_mobile
+description: Inventaire Intelligent — App terrain agents (QR/NFC/GPS offline-first)
+publish_to: none
+version: 1.0.0+1
+
+environment:
+  sdk: ">=3.0.0 <4.0.0"
+  flutter: ">=3.10.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+
+  # Network
+  dio: ^5.4.0
+  flutter_secure_storage: ^9.0.0
+
+  # Navigation
+  go_router: ^13.0.0
+
+  # Scan
+  mobile_scanner: ^5.0.0
+  nfc_manager: ^3.3.0
+
+  # Media / GPS
+  image_picker: ^1.0.7
+  geolocator: ^11.0.0
+
+  # Offline
+  isar: ^3.1.0+1
+  isar_flutter_libs: ^3.1.0+1
+  connectivity_plus: ^6.0.3
+
+  # UI
+  google_fonts: ^6.2.1
+  cached_network_image: ^3.3.1
+  intl: ^0.19.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  isar_generator: ^3.1.0+1
+  build_runner: ^2.4.8
+  flutter_lints: ^3.0.0
+
+flutter:
+  uses-material-design: true
