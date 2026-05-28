@@ -351,6 +351,12 @@ export default function DashboardPage() {
                 icon: '🗺️',
                 desc: `${byTagType['GPS'] ?? 0} balise(s) GPS · ${byTagType['BLE'] ?? 0} BLE`,
               },
+              {
+                label: 'Rapports',
+                href: '/dashboard/reports',
+                icon: '📊',
+                desc: 'Amortissements · VNC · Export CSV',
+              },
             ].map(item => (
               <button
                 key={item.href}

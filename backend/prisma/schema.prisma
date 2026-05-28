@@ -97,6 +97,7 @@ model Tag {
   assetId     String
   tagType     TagType
   hardwareId  String   @unique
+  imei        String?
   batteryLevel Int?
   lastSeen    DateTime?
   createdAt   DateTime @default(now())
@@ -115,11 +116,12 @@ model LocationHistory {
   latitude    Float
   longitude   Float
   siteName    String
-  capturedBy  String
+  capturedBy  String?
+  source      String?
   timestamp   DateTime @default(now())
 
   asset    Asset @relation(fields: [assetId], references: [id], onDelete: Cascade)
-  capturedByUser User @relation("CapturedBy", fields: [capturedBy], references: [id])
+  capturedByUser User? @relation("CapturedBy", fields: [capturedBy], references: [id])
 
   @@index([assetId])
   @@index([assetId, timestamp])

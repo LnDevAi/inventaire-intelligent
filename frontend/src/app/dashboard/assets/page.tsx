@@ -6,6 +6,7 @@ import { api } from '@/lib/api';
 import { Asset, AssetStatus, CreateAssetPayload } from '@/lib/types';
 import StatusBadge from '@/components/StatusBadge';
 import AssetForm from '@/components/AssetForm';
+import ExportButton from '@/components/ExportButton';
 
 const TAG_TYPE_ICON: Record<string, string> = {
   QR: '⬛', RFID: '📡', BLE: '🔵', GPS: '🛰️',
@@ -84,10 +85,13 @@ export default function AssetsPage() {
           <span className="text-white/20">/</span>
           <h1 className="text-xl font-bold">Biens</h1>
         </div>
-        <button onClick={() => setModal({ mode: 'create' })}
-          className="px-4 py-2 bg-blue-600 hover:bg-blue-500 rounded-xl text-sm font-semibold transition-colors">
-          + Nouveau bien
-        </button>
+        <div className="flex items-center gap-3">
+          <ExportButton assets={assets} filename="biens" />
+          <button onClick={() => setModal({ mode: 'create' })}
+            className="px-4 py-2 bg-blue-600 hover:bg-blue-500 rounded-xl text-sm font-semibold transition-colors">
+            + Nouveau bien
+          </button>
+        </div>
       </header>
 
       <div className="max-w-7xl mx-auto px-6 py-6 space-y-6">
