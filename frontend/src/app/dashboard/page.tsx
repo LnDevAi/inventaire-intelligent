@@ -2,6 +2,9 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTranslation } from 'react-i18next';
+import { toggleLang, currentLang } from '@/lib/i18n';
+import '@/lib/i18n';
 import { api } from '@/lib/api';
 import { Asset } from '@/lib/types';
 
@@ -11,12 +14,12 @@ interface AssetStats {
   totalValue: { _sum: { netBookValue: number; purchasePrice: number } };
 }
 
-const STATUS_META: Record<string, { label: string; color: string }> = {
-  ACTIVE:         { label: 'Actifs',       color: '#22c55e' },
-  IN_MAINTENANCE: { label: 'Maintenance',  color: '#eab308' },
-  DISPOSED:       { label: 'Cédés',        color: '#6b7280' },
-  LOST:           { label: 'Perdus',       color: '#f97316' },
-  STOLEN:         { label: 'Volés',        color: '#ef4444' },
+const STATUS_COLORS: Record<string, string> = {
+  ACTIVE: '#22c55e',
+  IN_MAINTENANCE: '#eab308',
+  DISPOSED: '#6b7280',
+  LOST: '#f97316',
+  STOLEN: '#ef4444',
 };
 
 const TAG_ICON: Record<string, string> = { QR: '⬛', RFID: '📡', BLE: '🔵', GPS: '🛰️' };
@@ -35,6 +38,8 @@ function buildConicGradient(segments: { pct: number; color: string }[]) {
 
 export default function DashboardPage() {
   const router = useRouter();
+  const { t } = useTranslation();
+  const [lang, setLang] = useState<'fr' | 'en'>(currentLang());
   const [stats, setStats] = useState<AssetStats | null>(null);
   const [assets, setAssets] = useState<Asset[]>([]);
   const [loading, setLoading] = useState(true);
@@ -105,8 +110,8 @@ export default function DashboardPage() {
     .filter(s => s._count > 0)
     .map(s => ({
       pct:   total > 0 ? (s._count / total) * 100 : 0,
-      color: STATUS_META[s.status]?.color ?? '#6b7280',
-      label: STATUS_META[s.status]?.label ?? s.status,
+      color: STATUS_COLORS[s.status] ?? '#6b7280',
+      label: t(`status.${s.status}`, s.status),
       count: s._count,
     }));
 
@@ -116,7 +121,7 @@ export default function DashboardPage() {
       <div className="min-h-screen bg-gray-950 flex items-center justify-center">
         <div className="flex flex-col items-center gap-3">
           <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
-          <p className="text-gray-400 text-sm">Chargement du tableau de bord…</p>
+          <p className="text-gray-400 text-sm">{t('dashboard.loading')}</p>
         </div>
       </div>
     );
@@ -141,20 +146,26 @@ export default function DashboardPage() {
               onClick={() => router.push('/dashboard/admin')}
               className="text-sm text-red-400 hover:text-red-300 transition-colors"
             >
-              Admin
+              {t('nav.admin')}
             </button>
           )}
           <button
             onClick={() => router.push('/dashboard/profile')}
             className="text-sm text-gray-400 hover:text-white transition-colors"
           >
-            Profil
+            {t('nav.profile')}
+          </button>
+          <button
+            onClick={() => { toggleLang(); setLang(currentLang()); }}
+            className="text-xs font-bold px-2 py-1 border border-white/20 hover:border-white/50 rounded text-gray-400 hover:text-white transition-colors"
+          >
+            {lang === 'fr' ? 'EN' : 'FR'}
           </button>
           <button
             onClick={() => { localStorage.removeItem('token'); router.push('/login'); }}
             className="text-sm text-gray-400 hover:text-white transition-colors"
           >
-            Déconnexion
+            {t('nav.logout')}
           </button>
         </div>
       </header>
@@ -322,11 +333,11 @@ export default function DashboardPage() {
 
         {/* ── Accès rapide ── */}
         <div>
-          <p className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-4">Accès rapide</p>
+          <p className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-4">{t('dashboard.quick_access')}</p>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {[
               {
-                label: 'Liste des biens',
+                label: t('modules.assets'),
                 href: '/dashboard/assets',
                 icon: '📦',
                 desc: `${total} actif(s) · ${
@@ -334,25 +345,25 @@ export default function DashboardPage() {
                 } en maintenance`,
               },
               {
-                label: 'Enrôler un tag',
+                label: t('modules.enroll'),
                 href: '/dashboard/enroll',
                 icon: '🏷️',
                 desc: `${tagCount} tag(s) actif(s)`,
               },
               {
-                label: 'Scan terrain',
+                label: t('modules.scan'),
                 href: '/dashboard/scan',
                 icon: '📱',
                 desc: 'QR · RFID · GPS — mode offline',
               },
               {
-                label: 'Carte GPS',
+                label: t('modules.map'),
                 href: '/dashboard/map',
                 icon: '🗺️',
                 desc: `${byTagType['GPS'] ?? 0} balise(s) GPS · ${byTagType['BLE'] ?? 0} BLE`,
               },
               {
-                label: 'Rapports',
+                label: t('modules.reports'),
                 href: '/dashboard/reports',
                 icon: '📊',
                 desc: 'Amortissements · VNC · Export CSV',
